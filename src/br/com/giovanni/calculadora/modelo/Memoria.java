@@ -5,10 +5,6 @@ import java.util.List;
 
 public class Memoria {
 
-    private enum TipoComando {
-        ZERAR, NUMERO, DIVISAO, MUTIPLICACAO, SUBTRACAO, SOMA, IGUAL, VIRGULA, PORCENTAGEM
-    };
-
     private static final Memoria instancia = new Memoria();
 
     private final List<MemoriaOservador> observadores =
@@ -46,6 +42,10 @@ public class Memoria {
 
         if (tipoComando == null){
             return;
+        }else if(tipoComando == TipoComando.TROCA_SINAL && textoAtual.contains("-")) {
+            textoAtual = textoAtual.substring(1);//retira 1 caracter do comeco do texto atual
+        }else if (tipoComando == TipoComando.TROCA_SINAL && !textoAtual.contains("-")){
+            textoAtual = "-" + textoAtual;
         }else if (tipoComando == TipoComando.ZERAR){
             textoAtual = "";
             textoBuffer = "";
@@ -72,7 +72,7 @@ public class Memoria {
     }
 
     private String obterResultadoOperacao() {
-        if (ultimaOperacao == null){
+        if (ultimaOperacao == null  || ultimaOperacao == TipoComando.IGUAL){
             return  textoAtual;
         }
 
@@ -90,6 +90,9 @@ public class Memoria {
         }else if (ultimaOperacao == TipoComando.DIVISAO){
             resultado = numeroBuffer / numeroAtual;
         }
+//        else if (ultimaOperacao == TipoComando.TROCA_SINAL){
+//            resultado = numeroBuffer * (-1);
+//        }
 
         String resultadoString = Double.toString(resultado).replace(".", ",");
         boolean inteiro = resultadoString.endsWith(",0");
@@ -126,6 +129,8 @@ public class Memoria {
                 return TipoComando.PORCENTAGEM;
             }else if (",".equals(texto) && !textoAtual.contains(",")){
                 return TipoComando.VIRGULA;
+            }else if ("+/-".equals(texto)){
+                return TipoComando.TROCA_SINAL;
             }
         }
 
